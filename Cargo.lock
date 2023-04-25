@@ -394,8 +394,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a987beff54b60ffa6d51982e1aa1146bc42f19bd26be28b0586f252fccf5317"
 
 [[package]]
-name = "lichess"
+name = "liboard"
 version = "0.1.0"
+dependencies = [
+ "lichess-board",
+]
 
 [[package]]
 name = "lichess-board"

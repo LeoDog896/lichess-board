@@ -8,16 +8,16 @@ pub struct LichessClient {
     base: String,
 }
 
-enum PlayerType {
+pub enum PlayerType {
     White,
     Black,
 }
 
-enum EventSource {
+pub enum EventSource {
     Lobby,
     Friend,
-    AI,
-    API,
+    Ai,
+    Api,
     Tournament,
     Position,
     Import,
@@ -28,7 +28,7 @@ enum EventSource {
     Swiss,
 }
 
-enum GameStatus {
+pub enum GameStatus {
     Created,
     Started,
     Aborted,
@@ -44,12 +44,12 @@ enum GameStatus {
     VariantEnd,
 }
 
-struct Compat {
+pub struct Compat {
     bot: bool,
     board: bool,
 }
 
-struct ChallengeUser {
+pub struct ChallengeUser {
     rating: i32,
     provisional: bool,
     online: bool,
@@ -59,7 +59,7 @@ struct ChallengeUser {
     patron: bool,
 }
 
-enum ChallengeStatus {
+pub enum ChallengeStatus {
     Created,
     Offline,
     Canceled,
@@ -67,7 +67,7 @@ enum ChallengeStatus {
     Accepted,
 }
 
-enum TimeControl {
+pub enum TimeControl {
     Speed {
         limit: i32,
         increment: i32,
@@ -79,12 +79,12 @@ enum TimeControl {
     },
 }
 
-struct Perf {
+pub struct Perf {
     icon: String,
     name: String,
 }
 
-struct Challenge {
+pub struct Challenge {
     id: String,
     url: String,
     status: String,
@@ -101,7 +101,7 @@ struct Challenge {
     decline_reason_key: String,
 }
 
-enum UserEvent {
+pub enum UserEvent {
     GameStart {
         id: String,
         source: EventSource,
@@ -128,7 +128,7 @@ enum UserEvent {
 impl LichessClient {
     /// Instantiates a new lichess client.
     /// You can generate a token at https://lichess.org/account/oauth/token
-    fn new(token: &str) -> LichessClient {
+    pub fn new(token: &str) -> LichessClient {
         LichessClient {
             token: token.to_string(),
             base: "https://lichess.org".to_string(),
@@ -137,7 +137,7 @@ impl LichessClient {
 
     /// Stream events from the user (e.g. challenges)
     /// This uses the `/api/stream/event` endpoint
-    async fn stream(&self) -> Result<impl Stream<Item = UserEvent>> {
+    pub async fn stream(&self) -> Result<impl Stream<Item = UserEvent>> {
         let req = reqwest::get(format!("{}/{}", self.base, "/api/stream/event")).await?;
         Ok(stream! {
             yield UserEvent::ChallengeDenied { id: "1".to_string() }

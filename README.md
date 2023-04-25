@@ -1,2 +1,2 @@
 # lichess-board
-deeply integrated lichess boad API in rust
+high-level lichess boad API in rust

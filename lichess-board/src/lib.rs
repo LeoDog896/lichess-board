@@ -1,8 +1,7 @@
 use async_stream::stream;
+use anyhow::Result;
 
 use futures_core::stream::Stream;
-use futures_util::pin_mut;
-use futures_util::stream::StreamExt;
 
 pub struct LichessClient {
     token: String,
@@ -76,7 +75,7 @@ enum TimeControl {
     },
     Unlimited,
     Correspondence {
-        daysPerTurn: i32,
+        days_per_turn: i32,
     },
 }
 
@@ -90,16 +89,16 @@ struct Challenge {
     url: String,
     status: String,
     challenger: ChallengeUser,
-    destUser: ChallengeUser,
+    dest_user: ChallengeUser,
     variant: String,
     rated: bool,
-    timeControl: TimeControl,
+    time_control: TimeControl,
     color: String,
     perf: Perf,
     direction: String,
-    initialFen: String,
-    declineReason: String,
-    declineReasonKey: String,
+    initial_fen: String,
+    decline_reason: String,
+    decline_reason_key: String,
 }
 
 enum UserEvent {
@@ -124,6 +123,8 @@ enum UserEvent {
     },
 }
 
+/// The low-level lichess client.
+/// Sends and receives directly from the lichess API.
 impl LichessClient {
     /// Instantiates a new lichess client.
     /// You can generate a token at https://lichess.org/account/oauth/token
@@ -136,9 +137,10 @@ impl LichessClient {
 
     /// Stream events from the user (e.g. challenges)
     /// This uses the `/api/stream/event` endpoint
-    async fn stream() -> impl Stream<Item = UserEvent> {
-        stream! {
+    async fn stream(&self) -> Result<impl Stream<Item = UserEvent>> {
+        let req = reqwest::get(format!("{}/{}", self.base, "/api/stream/event")).await?;
+        Ok(stream! {
             yield UserEvent::ChallengeDenied { id: "1".to_string() }
-        }
+        })
     }
 }

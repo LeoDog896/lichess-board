@@ -420,6 +420,8 @@ dependencies = [
  "async-stream",
  "futures-util",
  "reqwest",
+ "serde",
+ "serde_json",
  "tokio",
  "tokio-stream",
 ]

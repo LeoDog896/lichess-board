@@ -1,7 +1,7 @@
 use async_stream::try_stream;
 use anyhow::Result;
 use futures_util::TryStreamExt;
-use reqwest::Url;
+use reqwest::{Url, Response};
 use tokio::io::AsyncBufReadExt;
 use tokio_stream::Stream;
 use tokio_stream::wrappers::LinesStream;
@@ -151,14 +151,23 @@ impl LichessClient {
         }
     }
 
+    async fn get(&self, path: &str) -> Result<Response, reqwest::Error> {
+        self.client.get(self.base.join(path).expect("Could not add API endpoint!"))
+            .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", self.token))
+            .send()
+            .await
+    }
+
+    pub async fn email(&self) -> Result<String> {
+        let req = self.get("/api/account/email").await?;
+
+        Ok(req.text().await?)
+    }
+
     /// Stream events from the user (e.g. challenges)
     /// This uses the `/api/stream/event` endpoint
     pub async fn stream_events(&self) -> Result<impl Stream<Item = Result<UserEvent>>> {
-        let req = self.client
-            .get(self.base.join("/api/stream/event").expect("Could not add API endpoint"))
-            .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", self.token))
-            .send()
-            .await?;
+        let req = self.get("/api/stream/event").await?;
 
         let bytes_stream = StreamReader::new(req.bytes_stream().map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e)));
         let lines = bytes_stream.lines();

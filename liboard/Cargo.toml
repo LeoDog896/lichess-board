@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.70"
+clap = { version = "4.2.4", features = ["derive"] }
 futures-util = "0.3.28"
 lichess-board = { path = "../lichess-board" }
 tokio = { version = "1", features = ["full"] }

@@ -158,7 +158,11 @@ impl LichessClient {
         let bytes_stream = req.bytes_stream();
 
         let stream = stream! {
-            yield UserEvent::ChallengeDenied { id: "1".to_string() };
+            for await bytes in bytes_stream {
+                // let str = std::str::from_utf8(&bytes).unwrap();
+                println!("{:?}", bytes);
+                yield UserEvent::ChallengeDenied { id: "1".to_string() };
+            }
         };
 
         Ok(stream)

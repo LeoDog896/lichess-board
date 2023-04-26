@@ -22,7 +22,7 @@ async fn main_err() -> Result<()> {
     let args = Args::parse();
 
     let client = LichessClient::new(&args.token);
-    let stream = client.stream().await?;
+    let stream = client.stream_events().await?;
 
     pin_mut!(stream);
 

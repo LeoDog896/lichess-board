@@ -153,7 +153,7 @@ impl LichessClient {
 
     /// Stream events from the user (e.g. challenges)
     /// This uses the `/api/stream/event` endpoint
-    pub async fn stream(&self) -> Result<impl Stream<Item = Result<UserEvent>>> {
+    pub async fn stream_events(&self) -> Result<impl Stream<Item = Result<UserEvent>>> {
         let req = self.client
             .get(self.base.join("/api/stream/event").expect("Could not add API endpoint"))
             .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", self.token))

@@ -1,10 +1,11 @@
-use async_stream::stream;
+use async_stream::try_stream;
 use anyhow::Result;
+use reqwest::Url;
 use tokio_stream::Stream;
 
 pub struct LichessClient {
     token: String,
-    base: String,
+    base: Url,
     client: reqwest::Client,
 }
 
@@ -141,26 +142,27 @@ impl LichessClient {
     pub fn new(token: &str) -> LichessClient {
         LichessClient {
             token: token.to_string(),
-            base: "https://lichess.org".to_string(),
+            base: Url::parse("https://lichess.org").expect("Could not parse base URL"),
             client: reqwest::Client::new(),
         }
     }
 
     /// Stream events from the user (e.g. challenges)
     /// This uses the `/api/stream/event` endpoint
-    pub async fn stream(&self) -> Result<impl Stream<Item = UserEvent>> {
+    pub async fn stream(&self) -> Result<impl Stream<Item = Result<UserEvent>>> {
         let req = self.client
-            .get(format!("{}/{}", self.base, "/api/stream/event"))
+            .get(self.base.join("/api/stream/event").expect("Could not add API endpoint"))
             .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", self.token))
             .send()
             .await?;
 
         let bytes_stream = req.bytes_stream();
 
-        let stream = stream! {
+        let stream = try_stream! {
             for await bytes in bytes_stream {
-                // let str = std::str::from_utf8(&bytes).unwrap();
-                println!("{:?}", bytes);
+                let bytes = bytes?;
+                let str = std::str::from_utf8(&bytes)?;
+                println!("{}", str);
                 yield UserEvent::ChallengeDenied { id: "1".to_string() };
             }
         };

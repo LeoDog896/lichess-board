@@ -1,18 +1,20 @@
 use async_stream::stream;
 use anyhow::Result;
-
-use futures_core::stream::Stream;
+use tokio_stream::Stream;
 
 pub struct LichessClient {
     token: String,
     base: String,
+    client: reqwest::Client,
 }
 
+#[derive(Debug)]
 pub enum PlayerType {
     White,
     Black,
 }
 
+#[derive(Debug)]
 pub enum EventSource {
     Lobby,
     Friend,
@@ -28,6 +30,7 @@ pub enum EventSource {
     Swiss,
 }
 
+#[derive(Debug)]
 pub enum GameStatus {
     Created,
     Started,
@@ -44,11 +47,13 @@ pub enum GameStatus {
     VariantEnd,
 }
 
+#[derive(Debug)]
 pub struct Compat {
     bot: bool,
     board: bool,
 }
 
+#[derive(Debug)]
 pub struct ChallengeUser {
     rating: i32,
     provisional: bool,
@@ -59,6 +64,7 @@ pub struct ChallengeUser {
     patron: bool,
 }
 
+#[derive(Debug)]
 pub enum ChallengeStatus {
     Created,
     Offline,
@@ -67,6 +73,7 @@ pub enum ChallengeStatus {
     Accepted,
 }
 
+#[derive(Debug)]
 pub enum TimeControl {
     Speed {
         limit: i32,
@@ -79,11 +86,13 @@ pub enum TimeControl {
     },
 }
 
+#[derive(Debug)]
 pub struct Perf {
     icon: String,
     name: String,
 }
 
+#[derive(Debug)]
 pub struct Challenge {
     id: String,
     url: String,
@@ -101,6 +110,7 @@ pub struct Challenge {
     decline_reason_key: String,
 }
 
+#[derive(Debug)]
 pub enum UserEvent {
     GameStart {
         id: String,
@@ -132,15 +142,25 @@ impl LichessClient {
         LichessClient {
             token: token.to_string(),
             base: "https://lichess.org".to_string(),
+            client: reqwest::Client::new(),
         }
     }
 
     /// Stream events from the user (e.g. challenges)
     /// This uses the `/api/stream/event` endpoint
     pub async fn stream(&self) -> Result<impl Stream<Item = UserEvent>> {
-        let req = reqwest::get(format!("{}/{}", self.base, "/api/stream/event")).await?;
-        Ok(stream! {
-            yield UserEvent::ChallengeDenied { id: "1".to_string() }
-        })
+        let req = self.client
+            .get(format!("{}/{}", self.base, "/api/stream/event"))
+            .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", self.token))
+            .send()
+            .await?;
+
+        let bytes_stream = req.bytes_stream();
+
+        let stream = stream! {
+            yield UserEvent::ChallengeDenied { id: "1".to_string() };
+        };
+
+        Ok(stream)
     }
 }

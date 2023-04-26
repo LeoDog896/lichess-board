@@ -153,7 +153,7 @@ impl LichessClient {
 
     async fn get(&self, path: &str) -> Result<Response, reqwest::Error> {
         self.client.get(self.base.join(path).expect("Could not add API endpoint!"))
-            .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", self.token))
+            .header("Authorization", format!("Bearer {}", self.token))
             .send()
             .await
     }

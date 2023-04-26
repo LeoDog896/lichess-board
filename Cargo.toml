@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "lichess-board",
-    "liboard"
+    "liboard",
+    "lichess-client"
 ]

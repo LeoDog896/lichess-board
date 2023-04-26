@@ -1,10 +1,12 @@
 use anyhow::Result;
-use lichess_board::LichessClient;
+use lichess_client::LichessClient;
 use futures_util::{pin_mut, StreamExt};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+/// A simple lichess client.
+/// To get a token, go to https://lichess.org/account/oauth/token
 struct Args {
     /// The token to use for the lichess API
     #[clap(short, long)]

@@ -524,12 +524,12 @@ dependencies = [
  "anyhow",
  "clap",
  "futures-util",
- "lichess-board",
+ "lichess-client",
  "tokio",
 ]
 
 [[package]]
-name = "lichess-board"
+name = "lichess-client"
 version = "0.1.0"
 dependencies = [
  "anyhow",

@@ -1,7 +1,11 @@
 use async_stream::try_stream;
 use anyhow::Result;
+use futures_util::TryStreamExt;
 use reqwest::Url;
+use tokio::io::AsyncBufReadExt;
 use tokio_stream::Stream;
+use tokio_stream::wrappers::LinesStream;
+use tokio_util::io::StreamReader;
 
 pub struct LichessClient {
     token: String,
@@ -156,13 +160,14 @@ impl LichessClient {
             .send()
             .await?;
 
-        let bytes_stream = req.bytes_stream();
+        let bytes_stream = StreamReader::new(req.bytes_stream().map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e)));
+        let lines = bytes_stream.lines();
+        let lines_stream = LinesStream::new(lines);
 
         let stream = try_stream! {
-            for await bytes in bytes_stream {
-                let bytes = bytes?;
-                let str = std::str::from_utf8(&bytes)?;
-                println!("{}", str);
+            for await line in lines_stream {
+                let line = line?;
+                println!("{}", line);
                 yield UserEvent::ChallengeDenied { id: "1".to_string() };
             }
         };
